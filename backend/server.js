@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -19,8 +20,10 @@ app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 
-app.get('/', (req, res) => {
-  res.json({ message: 'Team Task Manager API is running' });
+const frontendDist = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendDist));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendDist, 'index.html'));
 });
 
 const PORT = process.env.PORT || 5000;
