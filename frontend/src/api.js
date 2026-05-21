@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : '');
 
 const jsonOptions = (token) => ({
   headers: {
@@ -14,9 +14,16 @@ export async function request(path, method = 'GET', body, token) {
     ...jsonOptions(token),
   });
 
-  const data = await response.json();
+  const text = await response.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (error) {
+    throw new Error(`Invalid JSON response from server: ${text}`);
+  }
+
   if (!response.ok) {
-    throw new Error(data.message || 'Request failed');
+    throw new Error(data.message || `Request failed with status ${response.status}`);
   }
   return data;
 }
